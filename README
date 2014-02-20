@@ -3,4 +3,6 @@ taq
 
 tic tac toh game in Go
 
-inspired by one employer's litmus test for a tic-tac-toe game in python which the user couldn't beat. You cannot beat this game. 
+inspired by one employer's litmus test for a tic-tac-toe game in python which the user couldn't beat. You cannot beat this game.
+
+Interface uses Gustavo Niemeyer's awesome QML implementation on Linux.

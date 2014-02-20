@@ -1,11 +1,11 @@
 import QtQuick 2.0
 
 Item {
+width: 360
+height: 360
 
-width: 25
-height: 24
-
-
+    
+ 
 
 Rectangle {
     width: 360
