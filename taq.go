@@ -18,6 +18,17 @@ func random(min, max int) int {
 var firstrand = random(1,9)
 
 
+func random_move() int {
+
+    randtry := random(1,9)
+    af := CellList[randtry-1] 
+    if af.Pic == "blank.png" { 
+        return randtry
+    } else {
+        random_move()
+    }
+return 1
+}
 
 type Cell struct {
     // Num 1-9
@@ -56,6 +67,16 @@ var Cell9 = NewCell(9)
 var firstmove = true
 
 
+func reset_board(){
+    for _, cell := range CellList {
+        fmt.Println(cell)
+        cell.Pic = "blank.png"
+    }
+    refresh()
+}
+
+
+
 
 func refresh() {
 // refresh all the cells
@@ -74,12 +95,16 @@ qml.Changed(&Cell9,&Cell9.Pic)
 
 
 func (c *Cell) Clicked() {
+    if c.Pic == "blank.png" {
+
+        //only do something if blank
     c.Pic = "X.png"
     refresh()
     // check if anyone won?
     ch := has_anyone_won()
     if ch {
-        fmt.Println("You won!")
+        time.Sleep(300 * time.Millisecond) 
+        reset_board()
         return
     }
     
@@ -88,27 +113,37 @@ func (c *Cell) Clicked() {
     last_move := c.Num
 
     
-    fmt.Println("Im registering that you clicked: ")
-    fmt.Printf("%v\n",c)
+   // fmt.Println("Im registering that you clicked: ")
+   // fmt.Printf("%v\n",c)
     
     //initialize Next_move_square
 
     // get_next_move always returns 1
     // if this is not firstmove 
     if firstmove==false {
-    
+    refresh() 
     // get the next move 
+    
+    // Call to STRATEGY ALGORITHM
+
     Next_move_square := get_next_move(last_move)
     
     fmt.Println("\nnext move is calculated as: ")
     fmt.Println(Next_move_square)
     // change that square 
     Next_cell := CellList[Next_move_square-1] 
+    
+    time.Sleep(100 * time.Millisecond)
+    
     Next_cell.Pic = "O.png"
     refresh()    
+    
     ch := has_anyone_won()
-    if ch {
+    
+    if ch==true {
         fmt.Println("You won!")
+        time.Sleep(300 * time.Millisecond)
+        reset_board()
         return
     }
 
@@ -121,7 +156,7 @@ func (c *Cell) Clicked() {
     refresh() 
 }
 
-    
+   } 
 }
 
 
@@ -131,18 +166,104 @@ type WinCom struct {
 }
 
 
+// need a utility function for
+// comparing int slices
+
+func removeone(cells []int) []int {
+    abba := []int{}
+    if len(cells) > 3 {
+
+    for i:=0;i<len(cells);i++{
+        if i != 0 {
+            abba = append(abba, cells[i])
+        }
+    }
+}
+return abba
+
+}
+
+func IntsContained(wincom, chosencells []int) bool {
+    // need to account for the fact
+    // that the user doesnt just select
+    // the wincom
+    // eg. they may select 2 5 8 9
+    // wincom 2 5 8
+    // chosencells 1 2 5 8
+    // so wincom
+    // pad wincom to match chosencells?
+    fmt.Println("These are the winning combs")
+    fmt.Println(wincom)
+    fmt.Println("These are the Chosen cells")
+
+    fmt.Println(chosencells)
+    
+    for i:=0;i<3;i++ {
+        // if first item of wincom
+        // isnt first item of chosencells
+        
+        // bug - index from chosencells
+        // cant be used to index wincom
+        // because they dont have identical lengths
+       if len(wincom) > 0 {  
+        if wincom[i] != chosencells[i] {
+        // failed to confirm - remove one
+            if len(chosencells) > 3 {
+        // remove one from combo and try again
+
+            oneless := removeone(chosencells)
+            
+            IntsContained(wincom,oneless)
+        }  else {
+        // wincom doesnt line up AND
+        // chosencells is 3 or less
+            return false
+        }
+}
+ }
+ }
+// if you arent caught up in the logic
+// return true
+return true
+}
+
+
+func get_board() [][]int {
+
+ os := []int{}
+    xs := []int{}
+    blanks := []int{}
+
+    for _, cel := range CellList {
+        if cel.Pic == "O.png" {
+            os = append(os,cel.Num)
+    }
+    if cel.Pic == "X.png" {
+        xs = append(xs,cel.Num)
+    }
+    if cel.Pic == "blank.png" {
+        blanks = append(blanks, cel.Num)
+    }
+}
+abba := [][]int{xs, os, blanks}
+return abba 
+}
+
+
+
 func has_anyone_won() bool {
 
-    wincomlist := make([]*WinCom,9,9)
+    wincomlist := make([][]int,8,8)
     // winning combinations
-    a1 := &WinCom{[]int{1,2,3}}
-    a2 := &WinCom{[]int{1,4,7}}
-    a3 := &WinCom{[]int{1,5,9}}
-    a4 := &WinCom{[]int{2,5,8}}
-    a5 := &WinCom{[]int{3,5,7}}
-    a6 := &WinCom{[]int{3,6,9}}
-    a7 := &WinCom{[]int{4,5,6}}
-    a8 := &WinCom{[]int{7,8,9}}
+
+    a1 := []int{1,2,3}
+    a2 := []int{1,4,7}
+    a3 := []int{1,5,9}
+    a4 := []int{2,5,8}
+    a5 := []int{3,5,7}
+    a6 := []int{3,6,9}
+    a7 := []int{4,5,6}
+    a8 := []int{7,8,9}
     wincomlist[0] = a1
     wincomlist[1] = a2
     wincomlist[2] = a3
@@ -151,23 +272,30 @@ func has_anyone_won() bool {
     wincomlist[5] = a6
     wincomlist[6] = a7
     wincomlist[7] = a8
-    os := []int{}
-    xs := []int{}
-    for _, cel := range CellList {
-        if cel.Pic == "O.png" {
-            os = append(os,cel.Num)
+  
+    bra := get_board()
+    xs := bra[0]
+    os := bra[1]
+
+// These are already ordered!
+// check for winners
+// check that there are at least
+// 3 entries for xs and os
+
+if len(xs)==3 || len(os)==3 { 
+for _, wincom := range wincomlist {
+    if IntsContained(wincom,os)==true {
+        fmt.Println("Os won!")
+        return true
     }
-    if cel.Pic == "X.png" {
-        xs = append(xs,cel.Num)
+    if IntsContained(wincom,xs)==true {
+        fmt.Println("Xs won!")
+        return true
     }
 }
+}
 
-fmt.Println("The Os are: ")
 
-fmt.Println(os)
-fmt.Println("\nThe Xs are: ")
-
-fmt.Println(xs)
 
 return false
 }
@@ -178,6 +306,9 @@ return false
 
 
 func get_next_move(cellnum int) int {
+// todo need logic check to see if
+// square returned is already inhabited
+
 
 // check if two squares owned in a row
 // check neighboring squares values
@@ -199,7 +330,7 @@ eight := []int{2,5,7,9}
 nine := []int{1,3,5,6,7,8}
 
 list := []int{}
-
+// squares to protect based on cellnum
 
 switch cellnum {
         case 1: list = one 
@@ -215,42 +346,48 @@ switch cellnum {
 //s := make([]int,9)
 // if a cell is marked
 // return the neighboring square
-nextmove := 0
 
+// STRATEGY ALGORITHM
+dangerous_xs := []int{}
+// Check if Square in list is not clicked square
 for _, square := range list {
-    if square != cellnum {
-// if it isnt the same square already clicked
-    ab := CellList[cellnum-1]    
-if ab.Pic=="X.png" {
+    ab := CellList[square-1]    
+
+    
+    if ab.Pic=="X.png" {
     // e.g. if the cell is marked
-    nextmove := get_winning_square(square, cellnum)    
-    return nextmove    
-}
+   dangerous_xs = append(dangerous_xs,ab.Num)
+   // add to list of dangerous xs
+   }
+   }
+   // now you have a list of dangerous xs
+   nextmove := get_winning_square(dangerous_xs, cellnum)    
+
+   return nextmove
 }
 
-}
-return nextmove
-}
 
 
 func checkcell(cellnum int) int {
-    fmt.Println("\n\nCellnum is : \n")
-    fmt.Println(cellnum)
     ac2 := CellList[cellnum-1]
      if ac2.Pic == "blank.png" {
          return cellnum 
          }
+         
     return 0 
      }
 
 
 
-func get_winning_square(square1 int, square2 int) int {
+func get_winning_square(dangerous_xs []int, selected_square int) int {
 
     // given two square returning winning square
-    ac := []int{square1, square2}
+    // loop through dangerous squares
+    for _, square1 := range dangerous_xs {
 
-    switch ac[0] {
+    ac := []int{square1, selected_square}
+
+    switch square1 {
         case 1:
             switch ac[1]{
             case 2:
@@ -391,8 +528,9 @@ func get_winning_square(square1 int, square2 int) int {
             ab:= checkcell(7); if ab != 0 { return ab }
         }
     }
-
-return 1
+}
+//ac := random_move()
+return random_move()
 }
 
 

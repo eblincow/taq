@@ -1,0 +1,18 @@
+taq notes:
+
+need algorithm get_next_move to check not only
+for open "dangerous spaces"
+but if the space in between two "dangerous spaces" is
+occupied, then not to choose that space
+
+in other words.
+
+user clicks 2
+and already owns 8
+we would need to check if 5 was empty before
+returning 5
+
+
+You_win()
+just make the wincom flash between blank and O or X
+Time.Millisecond.sleep or whatever
