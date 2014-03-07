@@ -1,18 +1,11 @@
 taq notes:
 
-need algorithm get_next_move to check not only
-for open "dangerous spaces"
-but if the space in between two "dangerous spaces" is
-occupied, then not to choose that space
+Cant tell when you won
 
-in other words.
+X 9 X 6 X 5 X 4 - didnt detect winq
 
-user clicks 2
-and already owns 8
-we would need to check if 5 was empty before
-returning 5
+X 9 X 6 - didnt fill O 3
 
 
-You_win()
-just make the wincom flash between blank and O or X
-Time.Millisecond.sleep or whatever
+Bug - defaulted to 1 twice!
+

@@ -69,7 +69,6 @@ var firstmove = true
 
 func reset_board(){
     for _, cell := range CellList {
-        fmt.Println(cell)
         cell.Pic = "blank.png"
     }
     refresh()
@@ -100,54 +99,33 @@ func (c *Cell) Clicked() {
         //only do something if blank
     c.Pic = "X.png"
     refresh()
-    // check if anyone won?
-    ch := has_anyone_won()
-    if ch {
-        time.Sleep(300 * time.Millisecond) 
-        reset_board()
-        return
-    }
     
-    // If not, make your move 
-    
-    last_move := c.Num
-
-    
-   // fmt.Println("Im registering that you clicked: ")
-   // fmt.Printf("%v\n",c)
-    
-    //initialize Next_move_square
-
-    // get_next_move always returns 1
-    // if this is not firstmove 
     if firstmove==false {
-    refresh() 
     // get the next move 
     
     // Call to STRATEGY ALGORITHM
 
-    Next_move_square := get_next_move(last_move)
-    
+    //Next_move_square := get_next_move(last_move)
+    check, Next_move_square := next_move() 
     fmt.Println("\nnext move is calculated as: ")
     fmt.Println(Next_move_square)
     // change that square 
+    // BUGS BUGS BUGS
+    // how to make 
+    
+     
+    if check==true {
+// check is true
     Next_cell := CellList[Next_move_square-1] 
     
-    time.Sleep(100 * time.Millisecond)
+    //time.Sleep(100 * time.Millisecond)
     
     Next_cell.Pic = "O.png"
+    
     refresh()    
-    
-    ch := has_anyone_won()
-    
-    if ch==true {
-        fmt.Println("You won!")
-        time.Sleep(300 * time.Millisecond)
-        reset_board()
-        return
-    }
-
-} else {
+}
+// first move not
+   } else {
     // if it is the first move 
     firstmove = false 
     // choose random value for first move
@@ -156,13 +134,9 @@ func (c *Cell) Clicked() {
     refresh() 
 }
 
+has_anyone_won()
+
    } 
-}
-
-
-type WinCom struct {
-    // winning combinations
-    comb []int 
 }
 
 
@@ -192,11 +166,7 @@ func IntsContained(wincom, chosencells []int) bool {
     // chosencells 1 2 5 8
     // so wincom
     // pad wincom to match chosencells?
-    fmt.Println("These are the winning combs")
-    fmt.Println(wincom)
-    fmt.Println("These are the Chosen cells")
 
-    fmt.Println(chosencells)
     
     for i:=0;i<3;i++ {
         // if first item of wincom
@@ -205,9 +175,13 @@ func IntsContained(wincom, chosencells []int) bool {
         // bug - index from chosencells
         // cant be used to index wincom
         // because they dont have identical lengths
-       if len(wincom) > 0 {  
-        if wincom[i] != chosencells[i] {
-        // failed to confirm - remove one
+       if len(wincom) >= i {  
+        // BUGS ARE HERE \|/
+           
+           if wincom[i] != chosencells[i] {
+        // BUGS are here
+               
+               // failed to confirm - remove one
             if len(chosencells) > 3 {
         // remove one from combo and try again
 
@@ -249,30 +223,37 @@ abba := [][]int{xs, os, blanks}
 return abba 
 }
 
+// wincom vars
+func get_wincoms() [][]int {
+
+wincomlist := make([][]int,8,8)
+// winning combinations
+// make list of winning combinations
+var a1 = []int{1,2,3}
+var a2 = []int{1,4,7}
+var a3 = []int{1,5,9}
+var a4 = []int{2,5,8}
+
+var a5 = []int{3,5,7}
+var a6 = []int{3,6,9}
+var a7 = []int{4,5,6}
+var a8 = []int{7,8,9}
+wincomlist[0] = a1
+wincomlist[1] = a2
+wincomlist[2] = a3
+wincomlist[3] = a4
+wincomlist[4] = a5
+wincomlist[5] = a6
+wincomlist[6] = a7
+wincomlist[7] = a8
+
+return wincomlist
+
+}
 
 
-func has_anyone_won() bool {
+func has_anyone_won()  {
 
-    wincomlist := make([][]int,8,8)
-    // winning combinations
-
-    a1 := []int{1,2,3}
-    a2 := []int{1,4,7}
-    a3 := []int{1,5,9}
-    a4 := []int{2,5,8}
-    a5 := []int{3,5,7}
-    a6 := []int{3,6,9}
-    a7 := []int{4,5,6}
-    a8 := []int{7,8,9}
-    wincomlist[0] = a1
-    wincomlist[1] = a2
-    wincomlist[2] = a3
-    wincomlist[3] = a4
-    wincomlist[4] = a5
-    wincomlist[5] = a6
-    wincomlist[6] = a7
-    wincomlist[7] = a8
-  
     bra := get_board()
     xs := bra[0]
     os := bra[1]
@@ -281,23 +262,282 @@ func has_anyone_won() bool {
 // check for winners
 // check that there are at least
 // 3 entries for xs and os
-
+wincomlist := get_wincoms()
 if len(xs)==3 || len(os)==3 { 
 for _, wincom := range wincomlist {
     if IntsContained(wincom,os)==true {
         fmt.Println("Os won!")
-        return true
+        
     }
     if IntsContained(wincom,xs)==true {
         fmt.Println("Xs won!")
-        return true
+        
     }
 }
 }
 
 
 
-return false
+}
+
+
+
+func next_move() (bool, int) {
+
+// get_board and get_wincoms
+// then analyze overlap
+    bra := get_board()
+    
+
+//     fmt.Printf("\nGet board: %v", bra[0])
+//     fmt.Printf("\nGet Board: %v", bra[1])
+// 
+    xs := bra[0]
+    //os := bra[1]
+    wincoms := get_wincoms()
+//    fmt.Println("\nwincoms: %v", wincoms)
+
+    //nextmove := 0
+    // only check if you have two xs
+
+    if len(xs) > 1 {
+    for _, winco := range wincoms {
+
+    ovlap, cel := wincom_overlap(xs, winco)
+   // fmt.Printf("\nWincom Overlap: %v", winco)
+
+    if ovlap != false {
+        return true, cel
+    }
+} 
+}     // get dangerous squares
+    // dangerous square = all but 1 wincom
+
+
+
+
+    ab := random_move()
+return true, ab
+
+
+}
+
+
+
+func wincom_overlap(xs []int, wincom []int) (bool, int) {
+
+   fmt.Println("Got into wincom_overlap!!!")
+
+    // return bool about if xs overlap an existing wincom
+// and if so, what is the missing square
+// e.g. xs = [1, 2, 5, 6]
+// wincom = [1, 2, 3]
+// wincom = [4, 5, 6]
+// they are sorted...
+// so i[0] has to equal c[0] but i[1] can equal c[1] or c[2]
+if wincom[0] != xs[0]  {
+    if len(xs) > 2 {
+        // remove first item and check again
+        xs = xs[1:]
+         
+        wincom_overlap(xs, wincom)
+    } else {
+        return false, 0
+    }
+}
+// so wincom position 0 and xs position 0 are the same
+// xs[1] or [2] has to match wincom[1]
+overlap := []int{}
+
+
+
+
+
+
+// Iterate through, building up overlap
+// loop through xs
+
+for _, x := range xs {
+// loop through wincoms 
+    for _, winco := range wincom {
+        fmt.Println("\nwinco :")
+        fmt.Println(winco)
+        fmt.Println("\nx :")
+        fmt.Println(x)
+
+
+        if winco == x {
+            overlap = append(overlap,x)
+           // adds only xs in both! 
+
+    }
+}
+
+}
+
+if len(overlap) == 3 {
+
+// wins!
+has_anyone_won()
+
+// won()
+}
+
+if len(overlap) == 2 {
+// This means you have two overlaps - which is the
+// same as saying you have two parts of a wincom
+
+// STRATEGY ALGORITHM
+// REAL
+
+    switch overlap[0] {
+        case 1:
+            switch overlap[1]{
+            case 2:
+                ab := checkcell(3); if ab != 0 { return true, ab }
+
+            case 3:
+                ab := checkcell(2); if ab != 0 { return true, ab }
+            case 7:
+            ab := checkcell(4); if ab != 0 { return true, ab }
+
+            case 4:
+                ab := checkcell(7); if ab != 0 { return true, ab }
+
+            case 5:
+                ab := checkcell(9); if ab != 0 { return true, ab }
+ 
+            
+            case 9:
+                ab := checkcell(5); if ab != 0 { return true, ab }
+ 
+            }
+        
+        case 2:
+            switch overlap[1]{
+            case 1:
+                ab:= checkcell(3); if ab != 0 { return true, ab }
+            case 3:
+                ab:= checkcell(1); if ab != 0 { return true, ab }
+            case 5:
+                ab:= checkcell(8); if ab != 0 { return true, ab }
+            case 8:
+                ab:= checkcell(5); if ab != 0 { return true, ab }
+            }
+        case 3:
+            switch overlap[1]{
+            case 1:
+                ab:= checkcell(2); if ab != 0 { return true, ab }
+            case 2:
+                ab:= checkcell(1); if ab != 0 { return true, ab }
+            case 5:
+                ab:= checkcell(7); if ab != 0 { return true, ab }
+            case 6:
+                ab:= checkcell(9); if ab != 0 { return true, ab }
+            case 9:
+                ab:= checkcell(6); if ab != 0 { return true, ab }
+            case 7:
+                ab:= checkcell(5); if ab != 0 { return true, ab }
+            }
+
+        case 4:
+            switch overlap[1]{
+            case 1:
+                ab:= checkcell(7); if ab != 0 { return true, ab }
+            case 6:
+                ab:= checkcell(5); if ab != 0 { return true, ab }
+            case 5:
+                ab:= checkcell(6); if ab != 0 { return true, ab }
+            case 7: 
+                ab:= checkcell(1); if ab != 0 { return true, ab }
+            }
+
+        case 5:
+            switch overlap[1]{
+            case 1:
+                ab:= checkcell(9); if ab != 0 { return true, ab }
+            case 9:
+                ab:= checkcell(1); if ab != 0 { return true, ab }
+            case 2:
+                ab:= checkcell(8); if ab != 0 { return true, ab }
+            case 8:
+                ab:= checkcell(2); if ab != 0 { return true, ab }
+            case 3:
+                ab:= checkcell(7); if ab != 0 { return true, ab }
+            case 7:
+                ab:= checkcell(3); if ab != 0 { return true, ab }
+            case 4:
+                ab:= checkcell(6); if ab != 0 { return true, ab }
+            case 6:
+                ab:= checkcell(4); if ab != 0 { return true, ab }
+            }
+
+        case 6:
+            switch overlap[1]{
+            case 3:
+                ab:= checkcell(9); if ab != 0 { return true, ab }
+            
+            case 9:
+
+                ab:= checkcell(3); if ab != 0 { return true, ab }
+            case 5:
+                ab:= checkcell(4); if ab != 0 { return true, ab }
+            case 4:
+                ab:= checkcell(5); if ab != 0 { return true, ab }
+            }
+
+        case 7:
+            switch overlap[1] {
+            case 8:
+                ab:= checkcell(9); if ab != 0 { return true, ab }
+            case 9:
+                ab:= checkcell(8); if ab != 0 { return true, ab }
+            case 5:
+                ab:= checkcell(3); if ab != 0 { return true, ab } 
+            case 3:
+                ab:= checkcell(5); if ab != 0 { return true, ab }
+            case 1:
+                ab:= checkcell(4); if ab != 0 { return true, ab }
+            case 4:
+                ab:= checkcell(1); if ab != 0 { return true, ab }
+
+            }
+
+        case 8:
+            switch overlap[1] {
+            case 9:
+                ab:= checkcell(7); if ab != 0 { return true, ab }
+            case 7: 
+            ab:= checkcell(9); if ab != 0 { return true, ab }
+
+            case 2:
+            ab:= checkcell(5); if ab != 0 { return true, ab }
+            case 5:
+            ab:= checkcell(2); if ab != 0 { return true, ab }
+        }
+
+       } // switch
+
+
+} //if 
+return true, random_move()
+}
+
+
+
+
+func preempt_dangerous_move(cellnum int) int {
+// if no wincom is being prevented
+// at least use an O to fill a dangerous
+// square
+// this should replace random_move()
+// which shouldnt be used unless starting
+
+dangerous_squares := get_dangerous_squares()
+
+
+return 0
+
 }
 
 
@@ -305,20 +545,15 @@ return false
 
 
 
-func get_next_move(cellnum int) int {
-// todo need logic check to see if
-// square returned is already inhabited
 
 
-// check if two squares owned in a row
-// check neighboring squares values
-// - get neighboring squares
-// - two match?
-// - if not, random
-// - if yes, hit the third
+func get_dangerous_squares(cellnum int) []int {
 
-// squares to protect for each marked square
-// these are all illegal things
+// in the case of just 1 x,
+// we need O to hit a 'dangerous' square
+// based on the value of x
+// and not a random one
+
 one := []int{2,3,4,5,7,9} 
 two := []int{1,3,5,8} 
 three := []int{1,2,5,6,7,9} 
@@ -331,7 +566,8 @@ nine := []int{1,3,5,6,7,8}
 
 list := []int{}
 // squares to protect based on cellnum
-
+// list of squares to protect
+// or preemptively fill
 switch cellnum {
         case 1: list = one 
         case 2: list = two
@@ -343,28 +579,30 @@ switch cellnum {
         case 8: list = eight 
         case 9: list = nine  
 }
-//s := make([]int,9)
-// if a cell is marked
-// return the neighboring square
 
 // STRATEGY ALGORITHM
-dangerous_xs := []int{}
+dangerous_squares := []int{}
+// unchecked squares which are in a cell's list
+// of squares to preemptively check
+
 // Check if Square in list is not clicked square
 for _, square := range list {
     ab := CellList[square-1]    
 
     
-    if ab.Pic=="X.png" {
+    if ab.Pic=="blank.png" {
     // e.g. if the cell is marked
-   dangerous_xs = append(dangerous_xs,ab.Num)
+   dangerous_squares = append(dangerous_squares,ab.Num)
    // add to list of dangerous xs
    }
    }
    // now you have a list of dangerous xs
-   nextmove := get_winning_square(dangerous_xs, cellnum)    
+   // should decide based on 
+   // "Dangerousness" e.g. can make wincom
+   // should they choose which one
 
-   return nextmove
-}
+   return dangerous_squares
+   }
 
 
 
@@ -373,13 +611,12 @@ func checkcell(cellnum int) int {
      if ac2.Pic == "blank.png" {
          return cellnum 
          }
-         
-    return 0 
+     return 0    
      }
 
 
 
-func get_winning_square(dangerous_xs []int, selected_square int) int {
+func get_winning_square(dangerous_xs []int, selected_square int) (bool, int) {
 
     // given two square returning winning square
     // loop through dangerous squares
@@ -391,146 +628,146 @@ func get_winning_square(dangerous_xs []int, selected_square int) int {
         case 1:
             switch ac[1]{
             case 2:
-                ab := checkcell(3); if ab != 0 { return ab }
+                ab := checkcell(3); if ab != 0 { return true, ab }
             case 3:
-                ab := checkcell(2); if ab != 0 { return ab }
+                ab := checkcell(2); if ab != 0 { return true, ab }
 
         case 7:
-            ab := checkcell(4); if ab != 0 { return ab }
+            ab := checkcell(4); if ab != 0 { return true, ab }
 
             case 4:
-                ab := checkcell(7); if ab != 0 { return ab }
+                ab := checkcell(7); if ab != 0 { return true, ab }
 
             case 5:
-                ab := checkcell(9); if ab != 0 { return ab }
+                ab := checkcell(9); if ab != 0 { return true, ab }
  
             
             case 9:
-                ab := checkcell(5); if ab != 0 { return ab }
+                ab := checkcell(5); if ab != 0 { return true, ab }
  
             }
         case 2:
             switch ac[1]{
             case 1:
-                ab:= checkcell(3); if ab != 0 { return ab }
+                ab:= checkcell(3); if ab != 0 { return true, ab }
             case 3:
-                ab:= checkcell(1); if ab != 0 { return ab }
+                ab:= checkcell(1); if ab != 0 { return true, ab }
             case 5:
-                ab:= checkcell(8); if ab != 0 { return ab }
+                ab:= checkcell(8); if ab != 0 { return true, ab }
             case 8:
-                ab:= checkcell(5); if ab != 0 { return ab }
+                ab:= checkcell(5); if ab != 0 { return true, ab }
             }
         case 3:
             switch ac[1]{
             case 1:
-                ab:= checkcell(2); if ab != 0 { return ab }
+                ab:= checkcell(2); if ab != 0 { return true, ab }
             case 2:
-                ab:= checkcell(1); if ab != 0 { return ab }
+                ab:= checkcell(1); if ab != 0 { return true, ab }
             case 5:
-                ab:= checkcell(7); if ab != 0 { return ab }
+                ab:= checkcell(7); if ab != 0 { return true, ab }
             case 6:
-                ab:= checkcell(9); if ab != 0 { return ab }
+                ab:= checkcell(9); if ab != 0 { return true, ab }
             case 9:
-                ab:= checkcell(6); if ab != 0 { return ab }
+                ab:= checkcell(6); if ab != 0 { return true, ab }
             case 7:
-                ab:= checkcell(5); if ab != 0 { return ab }
+                ab:= checkcell(5); if ab != 0 { return true, ab }
             }
 
         case 4:
             switch ac[1]{
             case 1:
-                ab:= checkcell(7); if ab != 0 { return ab }
+                ab:= checkcell(7); if ab != 0 { return true, ab }
             case 6:
-                ab:= checkcell(5); if ab != 0 { return ab }
+                ab:= checkcell(5); if ab != 0 { return true, ab }
             case 5:
-                ab:= checkcell(6); if ab != 0 { return ab }
+                ab:= checkcell(6); if ab != 0 { return true, ab }
             case 7: 
-                ab:= checkcell(1); if ab != 0 { return ab }
+                ab:= checkcell(1); if ab != 0 { return true, ab }
             }
 
         case 5:
             switch ac[1]{
             case 1:
-                ab:= checkcell(9); if ab != 0 { return ab }
+                ab:= checkcell(9); if ab != 0 { return true, ab }
             case 9:
-                ab:= checkcell(1); if ab != 0 { return ab }
+                ab:= checkcell(1); if ab != 0 { return true, ab }
             case 2:
-                ab:= checkcell(8); if ab != 0 { return ab }
+                ab:= checkcell(8); if ab != 0 { return true, ab }
             case 8:
-                ab:= checkcell(2); if ab != 0 { return ab }
+                ab:= checkcell(2); if ab != 0 { return true, ab }
             case 3:
-                ab:= checkcell(7); if ab != 0 { return ab }
+                ab:= checkcell(7); if ab != 0 { return true, ab }
             case 7:
-                ab:= checkcell(3); if ab != 0 { return ab }
+                ab:= checkcell(3); if ab != 0 { return true, ab }
             case 4:
-                ab:= checkcell(6); if ab != 0 { return ab }
+                ab:= checkcell(6); if ab != 0 { return true, ab }
             case 6:
-                ab:= checkcell(4); if ab != 0 { return ab }
+                ab:= checkcell(4); if ab != 0 { return true, ab }
             }
 
         case 6:
             switch ac[1]{
             case 3:
-                ab:= checkcell(9); if ab != 0 { return ab }
+                ab:= checkcell(9); if ab != 0 { return true, ab }
             case 9:
-                ab:= checkcell(3); if ab != 0 { return ab }
+                ab:= checkcell(3); if ab != 0 { return true, ab }
             case 5:
-                ab:= checkcell(4); if ab != 0 { return ab }
+                ab:= checkcell(4); if ab != 0 { return true, ab }
             case 4:
-                ab:= checkcell(5); if ab != 0 { return ab }
+                ab:= checkcell(5); if ab != 0 { return true, ab }
             }
 
         case 7:
             switch ac[1] {
             case 8:
-                ab:= checkcell(9); if ab != 0 { return ab }
+                ab:= checkcell(9); if ab != 0 { return true, ab }
             case 9:
-                ab:= checkcell(8); if ab != 0 { return ab }
+                ab:= checkcell(8); if ab != 0 { return true, ab }
             case 5:
-                ab:= checkcell(3); if ab != 0 { return ab } 
+                ab:= checkcell(3); if ab != 0 { return true, ab } 
             case 3:
-                ab:= checkcell(5); if ab != 0 { return ab }
+                ab:= checkcell(5); if ab != 0 { return true, ab }
             case 1:
-                ab:= checkcell(4); if ab != 0 { return ab }
+                ab:= checkcell(4); if ab != 0 { return true, ab }
             case 4:
-                ab:= checkcell(1); if ab != 0 { return ab }
+                ab:= checkcell(1); if ab != 0 { return true, ab }
 
             }
 
         case 8:
             switch ac[1] {
             case 9:
-                ab:= checkcell(7); if ab != 0 { return ab }
+                ab:= checkcell(7); if ab != 0 { return true, ab }
             case 7: 
-            ab:= checkcell(9); if ab != 0 { return ab }
+            ab:= checkcell(9); if ab != 0 { return true, ab }
 
         case 2:
-            ab:= checkcell(5); if ab != 0 { return ab }
+            ab:= checkcell(5); if ab != 0 { return true, ab }
         case 5:
-            ab:= checkcell(2); if ab != 0 { return ab }
+            ab:= checkcell(2); if ab != 0 { return true, ab }
         }
 
     case 9:
         switch ac[1] {
         case 1:
             
-            ab:= checkcell(5); if ab != 0 { return ab }
+            ab:= checkcell(5); if ab != 0 { return true, ab }
         case 5:
-            ab:= checkcell(1); if ab != 0 { return ab }
+            ab:= checkcell(1); if ab != 0 { return true, ab }
         case 3:
-            ab:= checkcell(6); if ab != 0 { return ab }
+            ab:= checkcell(6); if ab != 0 { return true, ab }
         case 6:
-            ab:= checkcell(3); if ab != 0 { return ab }
+            ab:= checkcell(3); if ab != 0 { return true, ab }
         case 7:
             
-            ab:= checkcell(8); if ab != 0 { return ab }
+            ab:= checkcell(8); if ab != 0 { return true, ab }
         case 8:
-            ab:= checkcell(7); if ab != 0 { return ab }
+            ab:= checkcell(7); if ab != 0 { return true, ab }
         }
     }
 }
 //ac := random_move()
-return random_move()
+return true, random_move()
 }
 
 
